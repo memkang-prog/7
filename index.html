@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>민원서비스 검색</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #f4f6f9;
+      color: #222;
+    }
+
+    header {
+      background: #1f5fbf;
+      color: #fff;
+      padding: 32px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 15px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    .search-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      margin-bottom: 24px;
+    }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #d8dee9;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #fff;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #1f5fbf;
+      box-shadow: 0 0 0 3px rgba(31, 95, 191, 0.15);
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .result-count {
+      font-size: 14px;
+      color: #555;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #1f5fbf;
+      color: #fff;
+    }
+
+    button.secondary {
+      background: #eef2f7;
+      color: #333;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .card-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .service-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 230px;
+    }
+
+    .service-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .service-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.4;
+      color: #111;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      white-space: nowrap;
+      background: #e8f1ff;
+      color: #1f5fbf;
+      font-weight: 600;
+    }
+
+    .service-desc {
+      margin: 0;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .meta {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: #444;
+      border-top: 1px solid #edf0f4;
+      padding-top: 12px;
+    }
+
+    .meta div {
+      display: flex;
+      gap: 6px;
+    }
+
+    .meta strong {
+      color: #222;
+      min-width: 58px;
+    }
+
+    .service-link {
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+      background: #1f5fbf;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .service-link:hover {
+      opacity: 0.9;
+    }
+
+    .empty {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 20px;
+      text-align: center;
+      color: #666;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+    }
+
+    .highlight {
+      background: #fff2a8;
+      color: #000;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      padding: 24px 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .card-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .search-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 23px;
+      }
+
+      .card-list {
+        grid-template-columns: 1fr;
+      }
+
+      .search-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-actions {
+        align-items: stretch;
+      }
+
+      .filter-actions button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>민원서비스 검색</h1>
+    <p>원하는 민원서비스를 키워드, 분야, 신청방법, 처리기관으로 빠르게 찾아보세요.</p>
+  </header>
+
+  <main class="container">
+    <section class="search-box" aria-label="민원서비스 검색 및 필터">
+      <div class="search-grid">
+        <input
+          type="text"
+          id="keywordInput"
+          placeholder="서비스명, 설명, 키워드 검색"
+          aria-label="검색어 입력"
+        />
+
+        <select id="categoryFilter" aria-label="분야 선택">
+          <option value="">전체 분야</option>
+        </select>
+
+        <select id="methodFilter" aria-label="신청방법 선택">
+          <option value="">전체 신청방법</option>
+        </select>
+
+        <select id="agencyFilter" aria-label="처리기관 선택">
+          <option value="">전체 처리기관</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <div class="result-count" id="resultCount">총 0건</div>
+
+        <div>
+          <button type="button" class="secondary" onclick="resetFilters()">초기화</button>
+          <button type="button" onclick="sortServices()">가나다순 정렬</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="serviceList" class="card-list" aria-label="민원서비스 목록"></section>
+  </main>
+
+  <footer>
+    © 민원서비스 검색 페이지
+  </footer>
+
+  <script>
+    /*
+      실제 첨부 민원서비스 목록이 있다면 아래 services 배열을 교체하세요.
+
+      필드 설명:
+      - title: 서비스명
+      - category: 분야
+      - method: 신청방법
+      - agency: 처리기관
+      - target: 대상
+      - description: 서비스 설명
+      - keywords: 검색용 키워드
+      - url: 상세 페이지 링크
+    */
+
+    let services = [
+      {
+        title: "주민등록등본 발급",
+        category: "주민등록",
+        method: "온라인",
+        agency: "행정복지센터",
+        target: "개인",
+        description: "주민등록표 등본을 온라인 또는 방문을 통해 발급받을 수 있는 서비스입니다.",
+        keywords: "주민등록 등본 초본 정부24 증명서",
+        url: "https://www.gov.kr"
+      },
+      {
+        title: "가족관계증명서 발급",
+        category: "가족관계",
+        method: "온라인",
+        agency: "대법원 전자가족관계등록시스템",
+        target: "개인",
+        description: "가족관계증명서, 기본증명서, 혼인관계증명서 등을 발급받을 수 있습니다.",
+        keywords: "가족관계 혼인 기본 증명서",
+        url: "https://efamily.scourt.go.kr"
+      },
+      {
+        title: "전입신고",
+        category: "주민등록",
+        method: "온라인/방문",
+        agency: "행정복지센터",
+        target: "세대주 또는 세대원",
+        description: "거주지를 이전한 경우 새로운 주소지로 전입신고를 하는 민원서비스입니다.",
+        keywords: "이사 주소변경 전입 주민등록",
+        url: "https://www.gov.kr"
+      },
+      {
+        title: "자동차 등록원부 발급",
+        category: "자동차",
+        method: "온라인/방문",
+        agency: "차량등록사업소",
+        target: "개인/법인",
+        description: "자동차의 소유권, 저당권 등 등록사항을 확인할 수 있는 등록원부를 발급합니다.",
+        keywords: "자동차 차량 등록원부 소유권",
+        url: "https://www.gov.kr"
+      },
+      {
+        title: "건축물대장 발급",
+        category: "부동산",
+        method: "온라인/방문",
+        agency: "시군구청",
+        target: "개인/법인",
+        description: "건축물의 위치, 면적, 구조, 용도 등을 확인할 수 있는 대장을 발급합니다.",
+        keywords: "건축물 대장 부동산 건물",
+        url: "https://www.gov.kr"
+      },
+      {
+        title: "지방세 납세증명서 발급",
+        category: "세금",
+        method: "온라인/방문",
+        agency: "시군구청",
+        target: "개인/법인",
+        description: "지방세 체납 여부를 확인할 수 있는 납세증명서를 발급받을 수 있습니다.",
+        keywords: "지방세 세금 납세 체납 증명",
+        url: "https://www.gov.kr"
+      }
+    ];
+
+    let isSorted = false;
+
+    const keywordInput = document.getElementById("keywordInput");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const methodFilter = document.getElementById("methodFilter");
+    const agencyFilter = document.getElementById("agencyFilter");
+    const serviceList = document.getElementById("serviceList");
+    const resultCount = document.getElementById("resultCount");
+
+    function init() {
+      populateFilters();
+      renderServices();
+
+      keywordInput.addEventListener("input", renderServices);
+      categoryFilter.addEventListener("change", renderServices);
+      methodFilter.addEventListener("change", renderServices);
+      agencyFilter.addEventListener("change", renderServices);
+    }
+
+    function populateFilters() {
+      fillSelect(categoryFilter, getUniqueValues("category"));
+      fillSelect(methodFilter, getUniqueValues("method"));
+      fillSelect(agencyFilter, getUniqueValues("agency"));
+    }
+
+    function getUniqueValues(key) {
+      return [...new Set(services.map(service => service[key]).filter(Boolean))].sort();
+    }
+
+    function fillSelect(selectElement, values) {
+      values.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        selectElement.appendChild(option);
+      });
+    }
+
+    function renderServices() {
+      const keyword = keywordInput.value.trim().toLowerCase();
+      const selectedCategory = categoryFilter.value;
+      const selectedMethod = methodFilter.value;
+      const selectedAgency = agencyFilter.value;
+
+      const filteredServices = services.filter(service => {
+        const searchText = `
+          ${service.title}
+          ${service.category}
+          ${service.method}
+          ${service.agency}
+          ${service.target}
+          ${service.description}
+          ${service.keywords}
+        `.toLowerCase();
+
+        const matchesKeyword = !keyword || searchText.includes(keyword);
+        const matchesCategory = !selectedCategory || service.category === selectedCategory;
+        const matchesMethod = !selectedMethod || service.method === selectedMethod;
+        const matchesAgency = !selectedAgency || service.agency === selectedAgency;
+
+        return matchesKeyword && matchesCategory && matchesMethod && matchesAgency;
+      });
+
+      resultCount.textContent = `총 ${filteredServices.length}건`;
+
+      if (filteredServices.length === 0) {
+        serviceList.className = "";
+        serviceList.innerHTML = `
+          <div class="empty">
+            <strong>검색 결과가 없습니다.</strong>
+            <p>검색어를 줄이거나 필터를 초기화해보세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      serviceList.className = "card-list";
+
+      serviceList.innerHTML = filteredServices.map(service => `
+        <article class="service-card">
+          <div class="service-top">
+            <h2 class="service-title">${highlightText(escapeHtml(service.title), keyword)}</h2>
+            <span class="badge">${escapeHtml(service.category)}</span>
+          </div>
+
+          <p class="service-desc">
+            ${highlightText(escapeHtml(service.description), keyword)}
+          </p>
+
+          <div class="meta">
+            <div>
+              <strong>신청</strong>
+              <span>${escapeHtml(service.method)}</span>
+            </div>
+
+            <div>
+              <strong>기관</strong>
+              <span>${escapeHtml(service.agency)}</span>
+            </div>
+
+            <div>
+              <strong>대상</strong>
+              <span>${escapeHtml(service.target)}</span>
+            </div>
+          </div>
+
+          <a class="service-link" href="${escapeHtml(service.url)}" target="_blank" rel="noopener noreferrer">
+            상세보기
+          </a>
+        </article>
+      `).join("");
+    }
+
+    function resetFilters() {
+      keywordInput.value = "";
+      categoryFilter.value = "";
+      methodFilter.value = "";
+      agencyFilter.value = "";
+      renderServices();
+    }
+
+    function sortServices() {
+      services.sort((a, b) => a.title.localeCompare(b.title, "ko"));
+      isSorted = true;
+      renderServices();
+    }
+
+    function highlightText(text, keyword) {
+      if (!keyword) return text;
+
+      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`(${escapedKeyword})`, "gi");
+
+      return text.replace(regex, `<span class="highlight">$1</span>`);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    init();
+  </script>
+</body>
+</html>
